@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splitr — Dashboard</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+<div class="app-layout" id="app" style="display:none">
+
+  <!-- Nav -->
+  <nav class="app-nav">
+    <span class="nav-logo display">SPLITR</span>
+    <span class="nav-spacer"></span>
+    <span class="nav-status" id="nav-status"></span>
+    <button class="btn btn-ghost btn-sm" onclick="openDataModal()">Données</button>
+    <button class="btn btn-primary btn-sm" onclick="openMonthModal()">+ Mois</button>
+    <button class="btn btn-ghost btn-sm" onclick="handleLogout()" title="Déconnexion">↩</button>
+  </nav>
+
+  <!-- Body -->
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-item" id="sidebar-global" onclick="showGlobalView()">
+        <span class="sidebar-month-label">Vue globale</span>
+      </button>
+      <div class="sidebar-divider"></div>
+      <div id="sidebar-months"></div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main" id="main-content">
+      <div class="empty">
+        <div class="spinner"></div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- Modal: Dépense -->
+<div class="modal-overlay" id="modal-expense" style="display:none" onclick="closeExpenseModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-expense-title">Nouvelle charge</span>
+      <button class="modal-close" onclick="closeExpenseModal()">×</button>
+    </div>
+    <div id="modal-expense-alert" class="alert alert-err" style="display:none"></div>
+    <form id="form-expense" onsubmit="handleSaveExpense(event)">
+      <div class="form-group">
+        <label for="exp-label">Libellé</label>
+        <input type="text" id="exp-label" placeholder="Loyer + charges" maxlength="100" required />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label for="exp-amount">Montant (€)</label>
+          <input type="number" id="exp-amount" placeholder="0.00" min="0.01" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label for="exp-category">Catégorie</label>
+          <select id="exp-category">
+            <option value="logement">Logement</option>
+            <option value="energie">Énergie</option>
+            <option value="telecom">Télécom</option>
+            <option value="assurance">Assurance</option>
+            <option value="remboursement">Remboursement</option>
+            <option value="courses">Courses</option>
+            <option value="transport">Transport</option>
+            <option value="loisirs">Loisirs</option>
+            <option value="sante">Santé</option>
+            <option value="autre" selected>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Payé par</label>
+        <div class="payer-toggle" id="payer-toggle"></div>
+      </div>
+      <div class="form-group">
+        <label>Répartition (part assumée par le payeur)</label>
+        <div class="pct-buttons">
+          <button type="button" class="pct-btn" onclick="setPct(0)">0%</button>
+          <button type="button" class="pct-btn active" onclick="setPct(50)">50%</button>
+          <button type="button" class="pct-btn" onclick="setPct(100)">100%</button>
+        </div>
+        <input type="number" id="exp-pct" value="50" min="0" max="100" step="1" oninput="onPctInput()" />
+      </div>
+      <div class="calc-hint mono" id="calc-hint">—</div>
+      <div class="form-group" style="margin-top:12px">
+        <label for="exp-note">Note (optionnel)</label>
+        <input type="text" id="exp-note" placeholder="Précision..." />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn btn-ghost" onclick="closeExpenseModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-expense">Enregistrer</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:6px">Ctrl+Entrée pour sauvegarder</div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Nouveau mois -->
+<div class="modal-overlay" id="modal-month" style="display:none" onclick="closeMonthModal(event)">
+  <div class="modal" style="max-width:360px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Nouveau mois</span>
+      <button class="modal-close" onclick="closeMonthModal()">×</button>
+    </div>
+    <div id="modal-month-alert" class="alert alert-err" style="display:none"></div>
+    <form onsubmit="handleCreateMonth(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label for="new-month">Mois</label>
+          <select id="new-month">
+            <option value="1">Janvier</option>
+            <option value="2">Février</option>
+            <option value="3">Mars</option>
+            <option value="4">Avril</option>
+            <option value="5">Mai</option>
+            <option value="6">Juin</option>
+            <option value="7">Juillet</option>
+            <option value="8">Août</option>
+            <option value="9">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="new-year">Année</label>
+          <input type="number" id="new-year" value="2026" min="2000" max="2099" />
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button type="button" class="btn btn-ghost" onclick="closeMonthModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Créer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Dupliquer mois -->
+<div class="modal-overlay" id="modal-duplicate" style="display:none" onclick="closeDuplicateModal(event)">
+  <div class="modal" style="max-width:360px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Dupliquer vers</span>
+      <button class="modal-close" onclick="closeDuplicateModal()">×</button>
+    </div>
+    <div id="modal-dup-alert" class="alert alert-err" style="display:none"></div>
+    <form onsubmit="handleDuplicate(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label for="dup-month">Mois cible</label>
+          <select id="dup-month">
+            <option value="1">Janvier</option>
+            <option value="2">Février</option>
+            <option value="3">Mars</option>
+            <option value="4">Avril</option>
+            <option value="5">Mai</option>
+            <option value="6">Juin</option>
+            <option value="7">Juillet</option>
+            <option value="8">Août</option>
+            <option value="9">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dup-year">Année cible</label>
+          <input type="number" id="dup-year" value="2026" min="2000" max="2099" />
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button type="button" class="btn btn-ghost" onclick="closeDuplicateModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Dupliquer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Données -->
+<div class="modal-overlay" id="modal-data" style="display:none" onclick="closeDataModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Données</span>
+      <button class="modal-close" onclick="closeDataModal()">×</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-summary" onclick="switchDataTab('summary')">Résumé</button>
+      <button class="tab" id="tab-export" onclick="switchDataTab('export')">Export</button>
+      <button class="tab" id="tab-import" onclick="switchDataTab('import')">Import</button>
+    </div>
+
+    <!-- Onglet Résumé -->
+    <div id="data-tab-summary">
+      <div id="data-summary-content"></div>
+    </div>
+
+    <!-- Onglet Export -->
+    <div id="data-tab-export" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card card-sm">
+          <div style="font-weight:500;margin-bottom:8px">Export JSON</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Télécharge toutes les données locales en JSON.</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Télécharger JSON</button>
+        </div>
+        <div class="card card-sm">
+          <div style="font-weight:500;margin-bottom:8px">Export CSV</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Format : mois, label, montant, payeur, pct, catégorie, note</div>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Télécharger CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Import -->
+    <div id="data-tab-import" style="display:none">
+      <div class="card card-sm" style="border-color:var(--err-b)">
+        <div style="font-weight:500;margin-bottom:6px">Import JSON</div>
+        <div class="alert alert-err" style="margin-bottom:10px">⚠ Cette action ajoute les charges des mois importés.</div>
+        <label for="import-paste" style="font-size:12px;color:var(--muted);margin-bottom:8px;display:block">Collez votre JSON ci-dessous (format export Splitr ou tableau)</label>
+        <textarea id="import-paste" rows="8" placeholder='{ "months": [...] }' style="width:100%;box-sizing:border-box;resize:vertical;font-family:var(--font-mono);font-size:12px;background:var(--s2);color:var(--txt);border:1px solid var(--b1);border-radius:var(--r-sm);padding:8px;margin-bottom:10px"></textarea>
+        <button class="btn btn-danger btn-sm" onclick="importJSON()">Importer</button>
+        <div id="import-result" style="font-size:12px;margin-top:8px;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/app.js"></script>
+</body>
+</html>

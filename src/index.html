@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splitr — Connexion</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo display">SPLITR</div>
+    <div class="auth-tagline">Partagez les charges. Simplement.</div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+      <button class="tab" id="tab-register" onclick="switchTab('register')">Créer un compte</button>
+    </div>
+
+    <div id="alert" class="alert alert-err" style="display:none"></div>
+
+    <!-- Login form -->
+    <form id="form-login" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="vous@exemple.com" required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center" id="btn-login">
+        Se connecter
+      </button>
+    </form>
+
+    <!-- Register form -->
+    <form id="form-register" style="display:none" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="reg-name">Nom</label>
+        <input type="text" id="reg-name" placeholder="Tanuki" required autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email</label>
+        <input type="email" id="reg-email" placeholder="vous@exemple.com" required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Mot de passe</label>
+        <input type="password" id="reg-password" placeholder="Minimum 8 caractères" required autocomplete="new-password" minlength="8" />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center" id="btn-register">
+        Créer le compte
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' })
+      const json = await res.json()
+      if (json.ok) window.location.href = '/app.html'
+    } catch {}
+  }
+
+  checkAuth()
+
+  function switchTab(tab) {
+    document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none'
+    document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none'
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login')
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register')
+    hideAlert()
+  }
+
+  function showAlert(msg) {
+    const el = document.getElementById('alert')
+    el.textContent = msg
+    el.style.display = ''
+  }
+
+  function hideAlert() {
+    document.getElementById('alert').style.display = 'none'
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId)
+    btn.disabled = loading
+    btn.textContent = loading ? '...' : (btnId === 'btn-login' ? 'Se connecter' : 'Créer le compte')
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault()
+    hideAlert()
+    setLoading('btn-login', true)
+
+    const email = document.getElementById('login-email').value
+    const password = document.getElementById('login-password').value
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      })
+      const json = await res.json()
+      if (json.ok) {
+        window.location.href = '/app.html'
+      } else {
+        showAlert(json.error || 'Erreur de connexion')
+      }
+    } catch {
+      showAlert('Erreur réseau')
+    } finally {
+      setLoading('btn-login', false)
+    }
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault()
+    hideAlert()
+    setLoading('btn-register', true)
+
+    const name = document.getElementById('reg-name').value
+    const email = document.getElementById('reg-email').value
+    const password = document.getElementById('reg-password').value
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+        credentials: 'include',
+      })
+      const json = await res.json()
+      if (json.ok) {
+        window.location.href = '/app.html'
+      } else {
+        showAlert(json.error || 'Erreur lors de la création du compte')
+      }
+    } catch {
+      showAlert('Erreur réseau')
+    } finally {
+      setLoading('btn-register', false)
+    }
+  }
+</script>
+</body>
+</html>

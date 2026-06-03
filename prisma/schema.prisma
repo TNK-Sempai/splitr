@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  name       String
+  password   String
+  color      String   @default("#c8f060")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  memberships GroupMember[]
+  expenses    Expense[]     @relation("ExpensePayer")
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  name      String
+  currency  String   @default("EUR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   GroupMember[]
+  months    Month[]
+}
+
+model GroupMember {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  groupId  Int
+  role     String @default("member")
+
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group    Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+model Month {
+  id        Int      @id @default(autoincrement())
+  groupId   Int
+  month     Int
+  year      Int
+  createdAt DateTime @default(now())
+
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  expenses  Expense[]
+
+  @@unique([groupId, month, year])
+}
+
+model Expense {
+  id         Int      @id @default(autoincrement())
+  monthId    Int
+  payerId    Int
+  label      String
+  amount     Decimal  @db.Decimal(10, 2)
+  pct        Int      @default(50)
+  category   String   @default("autre")
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  month      Month    @relation(fields: [monthId], references: [id], onDelete: Cascade)
+  payer      User     @relation("ExpensePayer", fields: [payerId], references: [id])
+}
