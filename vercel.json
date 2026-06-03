@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "api/*.js": { "runtime": "@vercel/node" }
-  },
   "routes": [
     { "src": "/api/auth/(.*)", "dest": "/api/auth.js" },
     { "src": "/api/groups/([^/]+)/balance", "dest": "/api/balance.js" },
