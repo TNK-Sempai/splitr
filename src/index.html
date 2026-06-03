@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Splitr — Connexion</title>
-  <link rel="stylesheet" href="/assets/style.css" />
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
 <div class="auth-page">
@@ -60,7 +60,9 @@
     try {
       const res = await fetch('/api/auth/me', { credentials: 'include' })
       const json = await res.json()
-      if (json.ok) window.location.href = '/app.html'
+      if (json.ok && !window.location.pathname.includes('app')) {
+        window.location.replace('/app.html')
+      }
     } catch {}
   }
 
@@ -107,7 +109,7 @@
       })
       const json = await res.json()
       if (json.ok) {
-        window.location.href = '/app.html'
+        window.location.replace('/app.html')
       } else {
         showAlert(json.error || 'Erreur de connexion')
       }
@@ -136,7 +138,7 @@
       })
       const json = await res.json()
       if (json.ok) {
-        window.location.href = '/app.html'
+        window.location.replace('/app.html')
       } else {
         showAlert(json.error || 'Erreur lors de la création du compte')
       }

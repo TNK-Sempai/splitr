@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -61,7 +61,7 @@ model Expense {
   monthId    Int
   payerId    Int
   label      String
-  amount     Decimal  @db.Decimal(10, 2)
+  amount     Decimal
   pct        Int      @default(50)
   category   String   @default("autre")
   note       String?

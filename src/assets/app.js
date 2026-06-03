@@ -29,18 +29,28 @@ async function api(method, path, body = null) {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // Auth check — seule erreur qui déclenche une redirection
   try {
     state.currentUser = await api('GET', '/api/auth/me')
-    state.groupId = state.currentUser.groupId || 1
-    document.getElementById('app').style.display = ''
-    document.getElementById('nav-status').textContent = state.currentUser.name
-
-    await Promise.all([loadMonths(), loadBalance(), loadGroupMembers()])
-    renderSidebar()
-    showGlobalView()
   } catch {
-    window.location.href = '/index.html'
+    const isOnAppPage = window.location.pathname.includes('app')
+    if (!isOnAppPage) return
+    window.location.replace('/index.html')
+    return
   }
+
+  state.groupId = state.currentUser.groupId || 1
+  document.getElementById('app').style.display = ''
+  document.getElementById('nav-status').textContent = state.currentUser.name
+
+  // Chargement données — erreurs non fatales, loggées sans rediriger
+  try {
+    await Promise.all([loadMonths(), loadBalance(), loadGroupMembers()])
+  } catch (err) {
+    console.error('[boot] Erreur chargement initial :', err.message)
+  }
+  renderSidebar()
+  showGlobalView()
 })
 
 async function loadMonths() {
@@ -712,7 +722,7 @@ async function refreshMonthAndBalance() {
 
 async function handleLogout() {
   try { await api('POST', '/api/auth/logout') } catch {}
-  window.location.href = '/index.html'
+  window.location.replace('/index.html')
 }
 
 // ── Client-side calc mirror ───────────────────────────────────────────────────

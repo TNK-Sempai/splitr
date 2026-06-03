@@ -1,17 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "src/**",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/api/auth/(.*)", "dest": "/api/auth.js" },
+    { "src": "/api/groups/([^/]+)/balance", "dest": "/api/balance.js" },
+    { "src": "/api/groups/(.*)", "dest": "/api/months.js" },
+    { "src": "/api/months/(.*)", "dest": "/api/months.js" },
+    { "src": "/api/expenses/(.*)", "dest": "/api/expenses.js" },
+    { "src": "/assets/(.*)", "dest": "/src/assets/$1" },
+    { "src": "/app\\.html", "dest": "/src/app.html" },
+    { "src": "/index\\.html", "dest": "/src/index.html" },
     { "src": "/app", "dest": "/src/app.html" },
     { "src": "/", "dest": "/src/index.html" }
   ]
