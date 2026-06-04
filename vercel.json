@@ -4,6 +4,7 @@
     { "src": "/api/auth/(.*)", "dest": "/api/auth.js" },
     { "src": "/api/groups/([^/]+)/balance", "dest": "/api/balance.js" },
     { "src": "/api/groups/(.*)", "dest": "/api/months.js" },
+    { "src": "/api/months/([^/]+)/expenses(.*)", "dest": "/api/expenses.js" },
     { "src": "/api/months/(.*)", "dest": "/api/months.js" },
     { "src": "/api/expenses/(.*)", "dest": "/api/expenses.js" }
   ]
