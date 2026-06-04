@@ -6,9 +6,6 @@
     { "src": "/api/groups/(.*)", "dest": "/api/months.js" },
     { "src": "/api/months/(.*)", "dest": "/api/months.js" },
     { "src": "/api/expenses/(.*)", "dest": "/api/expenses.js" },
-    { "src": "/assets/(.*)", "dest": "/src/assets/$1" },
-    { "src": "/app.html", "dest": "/src/app.html" },
-    { "src": "/index.html", "dest": "/src/index.html" },
-    { "src": "/", "dest": "/src/index.html" }
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
