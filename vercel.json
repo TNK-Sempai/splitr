@@ -12,19 +12,3 @@
     { "src": "/", "dest": "/src/index.html" }
   ]
 }
-
-{
-  "version": 2,
-  "outputDirectory": "src",
-  "routes": [
-    { "src": "/api/auth/(.*)", "dest": "/api/auth.js" },
-    { "src": "/api/groups/([^/]+)/balance", "dest": "/api/balance.js" },
-    { "src": "/api/groups/(.*)", "dest": "/api/months.js" },
-    { "src": "/api/months/(.*)", "dest": "/api/months.js" },
-    { "src": "/api/expenses/(.*)", "dest": "/api/expenses.js" },
-    { "src": "/assets/(.*)", "dest": "/src/assets/$1" },
-    { "src": "/app.html", "dest": "/src/app.html" },
-    { "src": "/index.html", "dest": "/src/index.html" },
-    { "src": "/", "dest": "/src/index.html" }
-  ]
-}
